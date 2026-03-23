@@ -40,7 +40,22 @@ The model is designed to work with **RC Stable Audio Tools (Enhanced Fork)**, wh
 - **RC Fork**: https://github.com/RoyalCities/RC-stable-audio-tools
 - **Original**: https://github.com/Stability-AI/stable-audio-tools
 
-### Setup Steps (RC Enhanced Fork)
+### Setup Steps (Getting the Model)
+
+If the model is not already in your workspace, you can download it directly from Hugging Face:
+
+**Option 1: Git LFS (Downloads the entire repository)**
+```bash
+git lfs install
+git clone https://huggingface.co/RoyalCities/Foundation-1
+```
+
+**Option 2: Hugging Face CLI (Downloads only the required files)**
+```bash
+huggingface-cli download RoyalCities/Foundation-1 Foundation_1.safetensors model_config.json --local-dir Foundation-1
+```
+
+### Setup Steps (RC Enhanced Fork Interface)
 
 1. Clone and install the RC Stable Audio Tools fork
 2. Create a subfolder inside the `models` directory
