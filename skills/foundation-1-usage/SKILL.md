@@ -1,13 +1,27 @@
 ---
 name: foundation-1-usage
-description: How to use the Foundation-1 (Foundation_1.safetensors) text-to-sample music generation model for structured audio sample generation. Use this skill whenever the user wants to generate music samples, loops, or audio using Foundation-1, needs help writing prompts for the model, wants to understand the model's tag system (instruments, timbre, FX, notation), needs guidance on setup, hardware requirements, BPM/bar timing, or anything related to Foundation-1 inference and production workflows. Also use when the user mentions "Foundation-1", "Foundation_1.safetensors", "stable audio", "text-to-sample", "music sample generation", or asks about generating loops, melodies, basslines, pads, or other musical phrases with AI.
+description: How to use the Foundation-1 (Foundation_1.safetensors) text-to-sample music generation model for structured audio sample generation. Use this skill whenever the user wants to generate music samples, loops, or audio using Foundation-1, needs help writing prompts for the model, wants to understand the model's tag system (instruments, timbre, FX, notation), needs guidance on setup, hardware requirements, BPM/bar timing, or anything related to Foundation-1 inference and production workflows. Also use when the user mentions "Foundation-1", "Foundation_1.safetensors", "stable-audio-tools with Foundation", or "text-to-sample generation". Do NOT trigger for general music production questions unrelated to Foundation-1, or for other audio generation models (e.g., MusicGen, AudioLDM).
 ---
 
 # Foundation-1 Usage Guide
 
 Foundation-1 is a structured **text-to-sample diffusion model** fine-tuned from `stabilityai/stable-audio-open-1.0`. It generates musically coherent, production-ready audio loops from layered text prompts. It is NOT a general-purpose music generator or a drum/percussion model — it is specifically designed for **sample-generation workflows** used in modern music production.
 
-The model file is `Foundation_1.safetensors` and its configuration is `model_config.json`, both located in the `Foundation-1/` directory.
+The model file is `Foundation_1.safetensors` and its configuration is `model_config.json`, both located in the `Foundation-1/` directory (relative to the workspace root).
+
+🎥 **Companion video**: [Foundation-1 overview and design philosophy](https://www.youtube.com/watch?v=O2iBBWeWaL8)
+
+---
+
+## When This Skill Is Triggered
+
+Follow these guidelines based on the user's request type:
+
+- **Setup / Installation** — First check if `Foundation-1/Foundation_1.safetensors` and `Foundation-1/model_config.json` exist in the workspace. Guide the user through RC Fork installation if needed.
+- **Prompt writing** — Generate 2–3 prompt candidates using the tag system below. Explain why each tag was chosen and what sonic character it targets.
+- **Programmatic usage** — Provide a working Python snippet using the API pattern in the Programmatic Usage Example section.
+- **Troubleshooting** — Start by verifying the BPM/Bar/`seconds_total` timing alignment, then check prompt structure.
+- **General questions** — Answer using the reference material in this skill. Point the user to `Foundation-1/Master_Tag_Reference.md` for the full tag list.
 
 ---
 
@@ -45,13 +59,53 @@ The model is designed to work with **RC Stable Audio Tools (Enhanced Fork)**, wh
 - **Sample Rate**: 44,100 Hz
 - **Audio Channels**: 2 (Stereo)
 - **Sample Size**: 882,000 samples (~20 seconds max)
-- **Text Encoder**: `t5-base` (max length 128 tokens)
+- **Text Encoder**: `t5-base` (max length **128 tokens** — prompts exceeding this will be truncated; keep prompts concise)
 - **Conditioning**: prompt (text), seconds_start (number), seconds_total (number)
 - **Diffusion backbone**: DiT with 24 layers, 24 attention heads, 1536 embedding dim
 
 When using programmatically (e.g., via `stable-audio-tools` Python API), set:
 - `seconds_start`: 0
 - `seconds_total`: the calculated duration based on BPM and bar count (see Timing Reference below)
+
+### Programmatic Usage Example
+
+```python
+import json
+import torch
+import torchaudio
+from stable_audio_tools.models.factory import create_model_from_config
+from stable_audio_tools.models.utils import load_ckpt_state_dict, copy_state_dict
+from stable_audio_tools.inference.generation import generate_diffusion_cond
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# 1. Load config and create model
+with open("Foundation-1/model_config.json") as f:
+    model_config = json.load(f)
+
+model = create_model_from_config(model_config)
+copy_state_dict(model, load_ckpt_state_dict("Foundation-1/Foundation_1.safetensors"))
+model = model.to(device)
+
+# 2. Calculate duration: 8 bars at 140 BPM = (8 × 4 × 60) / 140 ≈ 13.7s
+conditioning = [{
+    "prompt": "Synth Lead, Warm, Silky, Arp, Medium Reverb, 8 Bars, 140 BPM, F minor",
+    "seconds_start": 0,
+    "seconds_total": 13.7
+}]
+
+# 3. Generate (different seeds produce different musical variations)
+output = generate_diffusion_cond(
+    model,
+    conditioning=conditioning,
+    sample_size=model_config["sample_size"],
+    seed=42  # Change seed for different variations with the same timbre
+)
+
+torchaudio.save("output.wav", output.squeeze(0).cpu(), model_config["sample_rate"])
+```
+
+> **Note**: The same prompt with a different `seed` will produce different melodic/musical content while maintaining the same timbral character. This is useful for generating multiple variations of a sound.
 
 ---
 
@@ -72,7 +126,17 @@ Foundation-1 uses a **layered prompt system** with comma-separated tags. The ord
 5. **Always include Bar Count and BPM** — these define the loop structure (e.g., `8 Bars, 140 BPM`)
 6. **Always include a Key** — e.g., `C minor`, `F# major`, `Bb minor`
 7. **Ensure generation duration matches the musical structure** — see the Timing Reference section
-8. Use `Dry` for minimal FX processing, or `Wet` plus FX tags for more processed, spatial sounds
+8. **Use `Dry` / `Wet` to control overall FX processing** — `Dry` encourages minimal, clean output; `Wet` encourages more processed, spatial, effected sounds. Use `Wet` together with specific FX tags for best results
+9. **Keep prompts under ~25 tags** — the T5 encoder has a 128-token limit; overly long prompts may get truncated
+
+### Common Mistakes to Avoid
+
+- ❌ **Natural language sentences**: `"Play a warm piano melody in C minor"` — the model was not trained on natural language captions
+- ✅ **Structured tags instead**: `Grand Piano, Warm, Melody, 8 Bars, 120 BPM, C minor`
+- ❌ **Missing BPM/Bars**: `Synth Lead, Warm, Arp, F minor` — without timing info the loop structure will be undefined
+- ❌ **Duration mismatch**: requesting `8 Bars, 100 BPM` (needs 19.2s) but setting `seconds_total` to 10 — output will be incoherent
+- ❌ **Requesting drums**: `Drum Kit, Kick, Snare, Hi-Hat` — percussion is outside the model's training scope
+- ❌ **Genre-based prompting**: `Lo-fi hip hop beat` — only `Dubstep` and `Chiptune` exist as genre-adjacent tags, and they reinforce waveform behaviors rather than genre style
 
 ### Example Prompts
 
@@ -225,6 +289,19 @@ Because instrument identity and timbre were trained as separate layers, you can 
 - **Some timbre tags are stronger than others** — iterate to find the right balance
 - **Duration must match the bar/BPM structure** — otherwise output will be incoherent
 - **16-bit model only** — no quality loss compared to 32-bit
+- **T5 token limit** — prompts are capped at 128 tokens; excessive tags will be truncated silently
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| Output sounds incoherent or cut off | `seconds_total` is too short for the BPM/bar combination | Use the timing formula or table to set the correct duration |
+| Output ignores some tags | Prompt exceeds 128 T5 tokens | Reduce the number of tags; prioritize instrument + key timbre descriptors |
+| Output sounds generic | Too few descriptive tags | Add 2–3 timbre tags and a notation/structure tag |
+| Unexpected tonal character | Conflicting timbre tags (e.g., `Warm` + `Cold`) | Remove contradictory descriptors; iterate with fewer tags first |
+| No musical variation | Using same seed | Change the `seed` parameter for different melodic variations |
 
 ---
 
