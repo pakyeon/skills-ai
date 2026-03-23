@@ -42,17 +42,26 @@ The model is designed to work with **RC Stable Audio Tools (Enhanced Fork)**, wh
 
 ### Setup Steps (Getting the Model)
 
-If the model is not already in your workspace, you can download it directly from Hugging Face:
+If the model is not already in your workspace, you can download it from Hugging Face. The model uses `git-xet` for large file storage:
 
-**Option 1: Git LFS (Downloads the entire repository)**
+**Option 1: Git Clone with git-xet**
 ```bash
-git lfs install
+# Make sure git-xet is installed (https://hf.co/docs/hub/git-xet)
+winget install git-xet
+
 git clone https://huggingface.co/RoyalCities/Foundation-1
+
+# If you want to clone without large files - just their pointers
+GIT_LFS_SKIP_SMUDGE=1 git clone https://huggingface.co/RoyalCities/Foundation-1
 ```
 
-**Option 2: Hugging Face CLI (Downloads only the required files)**
+**Option 2: Hugging Face CLI (uv)**
 ```bash
-huggingface-cli download RoyalCities/Foundation-1 Foundation_1.safetensors model_config.json --local-dir Foundation-1
+# Make sure the hf CLI is installed
+uv tool install hf
+
+# Download the model
+hf download RoyalCities/Foundation-1
 ```
 
 ### Setup Steps (RC Enhanced Fork Interface)
