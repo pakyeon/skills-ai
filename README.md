@@ -6,9 +6,9 @@ This repository contains skills focused on **AI model usage** — providing stru
 
 ## Available Skills
 
-| Skill Name | Description |
-|---|---|
-| **[foundation-1-usage](skills/foundation-1-usage/)** | How to use the Foundation-1 (Foundation_1.safetensors) text-to-sample music generation model for structured audio sample generation. Covers setup, the 5-layer prompt tag system (instruments, timbre, FX, notation, timing), BPM/bar timing calculations, timbral mixing, and production workflows. |
+| Skill Name | Install | Description |
+|---|---|---|
+| **[foundation-1-usage](skills/foundation-1-usage/)** | ```npx skills add https://github.com/inferen-sh/skills --skill nano-banana-2``` | How to use the Foundation-1 (Foundation_1.safetensors) text-to-sample music generation model for structured audio sample generation. Covers setup, the 5-layer prompt tag system (instruments, timbre, FX, notation, timing), BPM/bar timing calculations, timbral mixing, and production workflows. |
 
 ## How to Use
 
