@@ -164,8 +164,9 @@ If those conditions are not met, recommend routing rather than consolidation.
 
 ## Example
 
-**Input:**
-I want to build a landing page, but I have too many frontend-related skills and I only want the ones I actually need.
+### Example 1
+
+**Input:** I want to build a landing page, but I have too many frontend-related skills and I only want the ones I actually need.
 
 **Output:**
 
@@ -199,10 +200,11 @@ frontend-skill
 - frontend-skill and frontend-design may need clearer boundaries if this overlap appears repeatedly
 ```
 
-**Example 2:**
-Input: I do not want implementation yet. Review my landing page and tell me which design or build skills should be ignored for this critique pass. Mention any later implementation skills separately.
+### Example 2
 
-Output:
+**Input:** I do not want implementation yet. Review my landing page and tell me which design or build skills should be ignored for this critique pass. Mention any later implementation skills separately.
+
+**Output:**
 
 ```md
 # Skill Routing
