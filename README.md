@@ -2,7 +2,7 @@
 
 Welcome to the **skills-ai** repository! 
 
-This repository contains skills focused on **AI model usage** — providing structured, actionable instructions for working with various AI models. Each skill is designed to help AI coding agents comprehensively understand and utilize specific AI models, covering setup, prompting, configuration, and production workflows.
+This repository contains skills focused on **AI model usage and knowledge workflows** — providing structured, actionable instructions for working with various AI models. Each skill is designed to help AI coding agents comprehensively understand and utilize specific AI models, covering setup, prompting, configuration, and production workflows.
 
 ## Available Skills
 
@@ -10,6 +10,7 @@ This repository contains skills focused on **AI model usage** — providing stru
 |---|---|---|
 | **[foundation-1-usage](skills/foundation-1-usage/)** | ```npx skills add https://github.com/pakyeon/skills-ai --skill foundation-1-usage``` | How to use the Foundation-1 (Foundation_1.safetensors) text-to-sample music generation model for structured audio sample generation. Covers setup, the 5-layer prompt tag system (instruments, timbre, FX, notation, timing), BPM/bar timing calculations, timbral mixing, and production workflows. |
 | **[skill-router](skills/skill-router/)** | ```npx skills add https://github.com/pakyeon/skills-ai --skill skill-router``` | Analyze the user's current task and route it to the smallest useful set of already-installed local skills. Best for resolving overlap, exclusions, ordering, and next-step selection among existing skills. |
+| **[eli5](skills/eli5/)** | ```npx skills add https://github.com/pakyeon/skills-ai --skill eli5``` | Explain technical or everyday topics in extremely simple terms using short, visual-first steps. |
 
 ## How to Use
 

@@ -1,0 +1,7 @@
+interface:
+  display_name: "ELI5 Explainer"
+  short_description: "Explain complex ideas with simple visual steps"
+  default_prompt: "Use $eli5 to explain a complex idea with simple visual steps."
+
+policy:
+  allow_implicit_invocation: true
