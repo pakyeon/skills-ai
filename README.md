@@ -26,6 +26,7 @@ For concrete development tools, libraries, APIs, and implementation workflows, s
 | **[foundation-1-usage](skills/foundation-1-usage/)** | Setup, structured prompting, timing, and programmatic usage for the Foundation-1 text-to-sample model | “Help me use Foundation-1”, “Write a Foundation-1 prompt”, “Troubleshoot Foundation-1 inference” |
 | **[skill-router](skills/skill-router/)** | Select the smallest useful set of already-installed skills and explain exclusions and order | “Which skill should I use?”, “These skills overlap”, “Route this task” |
 | **[eli5](skills/eli5/)** | Explain technical or everyday topics in extremely simple terms using short, visual-first steps | “Explain DNS like I’m five”, “Give me a picture-first explanation” |
+| **[project-docs-wiki](skills/project-docs-wiki/)** | Maintain project documents in `docs/` with evidence, linked current knowledge, duplicate consolidation, and decision history | “Save the project plan”, “Merge duplicate docs”, “Replace an approved decision”, “Resume from the latest project state” |
 
 ## Quick start
 
@@ -71,13 +72,54 @@ Use this skill when the main problem is choosing among installed skills. It reco
 
 Use this skill for beginner-friendly explanations. When workspace writing is available, it creates a self-contained `eli5.html` with simple visual steps; otherwise it returns the explainer directly in the response.
 
+### project-docs-wiki
+
+Use this skill to maintain plans, requirements, designs, decisions, work logs, progress, and other necessary or requested documents under each project's `docs/`. It follows existing project rules and creates folders by role as needed. The instructions and supporting guides are written in Korean.
+
+The workflow preserves source material, analyzes new evidence before integrating it, and distinguishes supported facts, inference, and unverified claims. Stable document IDs, links, and an index keep current knowledge connected. Duplicate consolidation preserves unique information and unresolved questions; replaced decisions move to `legacy/` with reasons and successor links. A recorded approval and a completed implementation remain separate states.
+
+One concise `SKILL.md` routes each task to only the relevant sections of five reference guides. The [methodology notes](skills/project-docs-wiki/references/methodology.md) record the source repositories and pinned revisions behind this synthesis. Apply it during meaningful project work, resumption, or document maintenance.
+
+Install using the collection's usual command:
+
+```bash
+npx skills add https://github.com/pakyeon/skills-ai --skill project-docs-wiki
+```
+
+Example requests, in the host's explicit skill syntax:
+
+```text
+Use $project-docs-wiki to save this project's plan and requirements in docs/ and link related documents.
+Use $project-docs-wiki to merge these duplicate design documents, preserving unique information and unverified items.
+Use $project-docs-wiki to replace the old decision using this approval record and preserve its history in legacy/.
+Use $project-docs-wiki to summarize the current decisions, implementation status, and pending validation from docs/.
+```
+
+The optional checker requires Python 3.10+ and uses only the standard library. Replace the placeholders with the installed skill folder, project folder, and current date:
+
+```text
+python <skill-folder>/scripts/wiki_health.py --docs <project>/docs --as-of YYYY-MM-DD --json
+```
+
+It checks local document structure, links, recorded evidence, and source hashes without modifying documents. It does not verify remote URLs, anchors, factual accuracy, or decision approval. Exit code `0` means no structural errors (warnings may remain), `1` indicates an execution or input error, and `2` indicates structural errors. See the [checker guide](skills/project-docs-wiki/references/health-tool.md) for scope and review requirements.
+
+Run the bundled checks against isolated fixtures in a scratch folder:
+
+```text
+python <skill-folder>/scripts/test_wiki_health.py --workspace <scratch-folder>
+```
+
 ## Repository layout
 
 ```text
 skills/
 ├── foundation-1-usage/
 ├── skill-router/
-└── eli5/
+├── eli5/
+└── project-docs-wiki/
+    ├── SKILL.md
+    ├── references/
+    └── scripts/
 ```
 
 Each skill has a required `SKILL.md`. Optional folders such as `agents/`, `references/`, `scripts/`, and `assets/` are used only when they support that skill's actual workflow.
